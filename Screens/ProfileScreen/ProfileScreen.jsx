@@ -11,11 +11,11 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
-export const RegistrationScreen = ({ navigation }) => {
+export const ProfileScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isNotVisiblePassword, setIsVisiblePassword] = useState(true);
+  const [isVisiblePassword, setIsVisiblePassword] = useState(false);
   const [isFocusedLogin, setIsFocusedLogin] = useState(false);
   const [isFocusedEmail, setIsFocusedEmail] = useState(false);
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
@@ -23,9 +23,6 @@ export const RegistrationScreen = ({ navigation }) => {
   const [changeEmailColor, setChangeEmailColor] = useState(false);
   const [changePasswordColor, setChangePasswordColor] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-
-  const behavior = Platform.OS === "ios" ? "padding" : "height";
-  const keyboardVerticalOffset = Platform.OS === "ios" ? -120 : -100;
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -44,7 +41,7 @@ export const RegistrationScreen = ({ navigation }) => {
   };
 
   const toggleVisibility = () => {
-    setIsVisiblePassword(!isNotVisiblePassword);
+    setIsVisiblePassword(!isVisiblePassword);
   };
 
   const handleBlur = (variant) => {
@@ -93,7 +90,6 @@ export const RegistrationScreen = ({ navigation }) => {
     ) {
       console.log(login, email, password);
       reset();
-      navigation.navigate("Home", { screen: "PostsScreen" });
     }
 
     reset();
@@ -136,107 +132,18 @@ export const RegistrationScreen = ({ navigation }) => {
           source={require("../images/bgImg.jpg")}
           style={styles.bgImg}
         >
-          <KeyboardAvoidingView
-            behavior={behavior}
-            keyboardVerticalOffset={keyboardVerticalOffset}
-          >
-            <View
-              style={[
-                styles.container,
-                // isFocusedLogin || isFocusedEmail || isFocusedPassword
-                //   ? styles.openKeyBoardContainer
-                //   : null,
-                // !isKeyboardVisible ? styles.closeKeyBoardContainer : null,
-              ]}
-            >
-              <View style={styles.avatarContainer}>
-                <View style={styles.avatar}>
-                  <TouchableOpacity style={styles.addBtn}>
-                    <View style={styles.plusIcon}>
-                      <View style={styles.vertical} />
-                      <View style={styles.horizontal} />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>Реєстрація</Text>
-              </View>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Логін"
-                  onChangeText={(newText) => setLogin(newText)}
-                  onBlur={() => handleBlur("login")}
-                  onFocus={() => handleFocus("login")}
-                  onChange={() => changeColor("login")}
-                  defaultValue={login}
-                  style={[
-                    styles.input,
-                    isFocusedLogin ? styles.focusInput : null,
-                    changeLoginColor ? styles.changeInput : null,
-                  ]}
-                  cursorColor={"#212121"}
-                  underlineColorAndroid="transparent"
-                />
-                <TextInput
-                  placeholder="Адреса електронної пошти"
-                  onChangeText={(newText) => setEmail(newText)}
-                  defaultValue={email}
-                  onBlur={() => handleBlur("email")}
-                  onFocus={() => handleFocus("email")}
-                  onChange={() => changeColor("email")}
-                  style={[
-                    styles.input,
-                    isFocusedEmail ? styles.focusInput : null,
-                    changeEmailColor ? styles.changeInput : null,
-                  ]}
-                  cursorColor={"#212121"}
-                  inputMode="email"
-                  keyboardType="email-address"
-                />
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    placeholder="Пароль"
-                    onChangeText={(newText) => setPassword(newText)}
-                    defaultValue={password}
-                    secureTextEntry={isNotVisiblePassword}
-                    onBlur={() => handleBlur("password")}
-                    onFocus={() => handleFocus("password")}
-                    onChange={() => changeColor("password")}
-                    style={[
-                      styles.input,
-                      isFocusedPassword ? styles.focusInput : null,
-                      changePasswordColor ? styles.changeInput : null,
-                    ]}
-                    cursorColor={"#212121"}
-                  />
-                  <TouchableOpacity
-                    style={styles.showPasswordButton}
-                    onPress={() => toggleVisibility()}
-                  >
-                    {isNotVisiblePassword ? (
-                      <Text style={styles.logIn}>Показати</Text>
-                    ) : (
-                      <Text style={styles.logIn}>Сховати</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.btnContainer}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => handleSubmit()}
-                >
-                  <Text style={styles.buttonText}>Зареєструватися</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("LoginScreen")}
-                >
-                  <Text style={styles.logIn}>Вже є акаунт? Увійти</Text>
+          <View style={[styles.container]}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <TouchableOpacity style={styles.addBtn}>
+                  <View style={styles.plusIcon}>
+                    <View style={styles.vertical} />
+                    <View style={styles.horizontal} />
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </ImageBackground>
       </View>
     </TouchableWithoutFeedback>
@@ -268,12 +175,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-  },
-  // openKeyBoardContainer: {
-  //   bottom: 98,
-  // },
-  closeKeyBoardContainer: {
-    bottom: 0,
   },
   avatarContainer: {
     position: "absolute",

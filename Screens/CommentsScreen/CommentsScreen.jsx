@@ -11,8 +11,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
-export const CommentsScreen = () => {
+export const CommentsScreen = ({ navigation }) => {
   const [message, setMessage] = useState("");
   const [text, setText] = useState("");
 
@@ -30,11 +31,17 @@ export const CommentsScreen = () => {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity>
-            <Image
-              source={require("../images/arrow-left.jpg")}
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("Home", { screen: "PostsScreen" })
+            }
+          >
+            <Ionicons
+              name="ios-arrow-back-outline"
+              size={24}
+              color="black"
               style={styles.backBtn}
-            ></Image>
+            />
           </TouchableOpacity>
           <Text style={styles.headerText}>Коментарі</Text>
         </View>
@@ -157,9 +164,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     position: "absolute",
+    bottom: -400,
   },
   input: {
-    bottom: 0,
     width: 343,
     height: 50,
     padding: 16,

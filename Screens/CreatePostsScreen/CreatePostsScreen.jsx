@@ -11,15 +11,23 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
-export const CreatePostsScreen = () => {
+export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
   const [place, setPlace] = useState("");
   const [isFocusedTitle, setIsFocusedTitle] = useState(false);
   const [isFocusedPlace, setIsFocusedPlace] = useState(false);
-  // const [changeTitleColor, setChangeTitleColor] = useState(false);
-  // const [changePlaceColor, setChangePlaceColor] = useState(false);
   const [isButtonActive, setIsButtonActive] = useState(false);
+  const [isFieldsEmpty, setIsFieldsEmpty] = useState(true);
+
+  useEffect(() => {
+    if (isFieldsEmpty === false) {
+      navigation.navigate("PostsScreen");
+    }
+  }, [isFieldsEmpty]);
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -42,85 +50,103 @@ export const CreatePostsScreen = () => {
 
   const handleSubmit = () => {
     if (title !== "" && place !== "" && isButtonActive) {
-      setPlace("");
-      setTitle("");
+      reset();
       setIsButtonActive(false);
+      setIsFieldsEmpty(false);
     }
+  };
+
+  const reset = () => {
+    if (title !== "" || place !== "") setPlace("");
+    setTitle("");
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity>
-            <Image
-              source={require("../images/arrow-left.jpg")}
-              style={styles.backBtn}
-            ></Image>
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Створити публікацію</Text>
-        </View>
-        <View style={styles.addPhotoContainer}>
-          <View style={styles.photoContainer}>
-            <View style={styles.photoIconContainer}>
-              <Image
-                source={require("../images/camera.jpg")}
-                style={styles.cameraIcon}
-              ></Image>
-            </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Home", { screen: "PostsScreen" })
+              }
+            >
+              <Ionicons
+                name="ios-arrow-back-outline"
+                size={24}
+                color="black"
+                style={styles.backBtn}
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerText}>Створити публікацію</Text>
           </View>
-          <Text style={styles.photoText}>Завантажте фото</Text>
-        </View>
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, isFocusedTitle ? styles.focusInput : null]}
-              placeholder="Назва..."
-              defaultValue={title}
-              cursorColor={"#BDBDBD"}
-              onFocus={() => handleFocus("title")}
-              onChangeText={(newText) => setTitle(newText)}
-              onBlur={() => enableBtn()}
-            ></TextInput>
-            <View style={styles.inputAddress}>
+          <View style={styles.addPhotoContainer}>
+            <View style={styles.photoContainer}>
+              <View style={styles.photoIconContainer}>
+                <FontAwesome name="camera" size={24} color="#BDBDBD" />
+              </View>
+            </View>
+            <Text style={styles.photoText}>Завантажте фото</Text>
+          </View>
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
               <TextInput
                 style={[
                   styles.input,
-                  isFocusedPlace ? styles.focusInput : null,
-                  styles.address,
+                  isFocusedTitle ? styles.focusInput : null,
                 ]}
-                placeholder="Місцевість..."
-                defaultValue={place}
+                placeholder="Назва..."
+                defaultValue={title}
                 cursorColor={"#BDBDBD"}
-                onFocus={() => handleFocus("place")}
-                onChangeText={(newText) => setPlace(newText)}
+                onFocus={() => handleFocus("title")}
+                onChangeText={(newText) => setTitle(newText)}
                 onBlur={() => enableBtn()}
               ></TextInput>
-              <Image
-                source={require("../images/map-pin.jpg")}
-                style={styles.mapIcon}
-              ></Image>
+              <View style={styles.inputAddress}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    isFocusedPlace ? styles.focusInput : null,
+                    styles.address,
+                  ]}
+                  placeholder="Місцевість..."
+                  defaultValue={place}
+                  cursorColor={"#BDBDBD"}
+                  onFocus={() => handleFocus("place")}
+                  onChangeText={(newText) => setPlace(newText)}
+                  onBlur={() => enableBtn()}
+                ></TextInput>
+                <FontAwesome5
+                  name="map-marker-alt"
+                  size={24}
+                  color="#BDBDBD"
+                  style={styles.mapIcon}
+                />
+              </View>
             </View>
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.postBtn,
-              isButtonActive ? styles.enablePostBtn : null,
-            ]}
-            onPress={() => handleSubmit()}
-            // accessibilityState={{ disabled: isButtonActive }}
-          >
-            <Text
+            <TouchableOpacity
               style={[
-                styles.btnText,
-                isButtonActive ? styles.enableBtnText : null,
+                styles.postBtn,
+                isButtonActive ? styles.enablePostBtn : null,
               ]}
+              onPress={() => handleSubmit()}
             >
-              Опублікувати
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteBtn}></TouchableOpacity>
-        </View>
+              <Text
+                style={[
+                  styles.btnText,
+                  isButtonActive ? styles.enableBtnText : null,
+                ]}
+              >
+                Опублікувати
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => reset()}>
+              <FontAwesome5 name="trash-alt" size={24} color="#BDBDBD" />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -225,8 +251,6 @@ const styles = StyleSheet.create({
   },
   mapIcon: {
     position: "absolute",
-    width: 24,
-    height: 24,
     bottom: 13,
   },
   focusInput: {
@@ -255,6 +279,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   deleteBtn: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     width: 70,
     height: 40,
     borderRadius: 100,

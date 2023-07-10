@@ -10,16 +10,19 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export const LoginScreen = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isVisiblePassword, setIsVisiblePassword] = useState(false);
+  const [isNotVisiblePassword, setIsVisiblePassword] = useState(true);
   const [isFocusedEmail, setIsFocusedEmail] = useState(false);
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
   const [changeEmailColor, setChangeEmailColor] = useState(false);
   const [changePasswordColor, setChangePasswordColor] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [isFieldsEmpty, setIsFieldsEmpty] = useState(true);
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -35,7 +38,7 @@ export const LoginScreen = () => {
   };
 
   const toggleVisibility = () => {
-    setIsVisiblePassword(!isVisiblePassword);
+    setIsVisiblePassword(!isNotVisiblePassword);
   };
 
   const handleBlur = (variant) => {
@@ -72,10 +75,12 @@ export const LoginScreen = () => {
   const handleSubmit = () => {
     if (email !== "" && password !== "" && isValidEmail(email)) {
       console.log(email, password);
+      setIsFieldsEmpty(false);
+      reset();
+      navigation.navigate("Home", { screen: "PostsScreen" });
+    } else {
       reset();
     }
-
-    reset();
   };
 
   const reset = () => {
@@ -150,7 +155,7 @@ export const LoginScreen = () => {
                     placeholder="Пароль"
                     onChangeText={(newText) => setPassword(newText)}
                     defaultValue={password}
-                    secureTextEntry={isVisiblePassword}
+                    secureTextEntry={isNotVisiblePassword}
                     onBlur={() => handleBlur("password")}
                     onFocus={() => handleFocus("password")}
                     onChange={() => changeColor("password")}
@@ -165,7 +170,11 @@ export const LoginScreen = () => {
                     style={styles.showPasswordButton}
                     onPress={() => toggleVisibility()}
                   >
-                    <Text style={styles.logIn}>Показати</Text>
+                    {isNotVisiblePassword ? (
+                      <Text style={styles.logIn}>Показати</Text>
+                    ) : (
+                      <Text style={styles.logIn}>Сховати</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -176,7 +185,9 @@ export const LoginScreen = () => {
                 >
                   <Text style={styles.buttonText}>Увійти</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("RegistrationScreen")}
+                >
                   <Text style={styles.logIn}>
                     Немає акануту?{" "}
                     <Text style={styles.underlinedText}>Зареєструватися</Text>
