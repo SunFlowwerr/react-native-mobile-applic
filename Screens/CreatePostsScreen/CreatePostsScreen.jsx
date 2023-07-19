@@ -14,6 +14,8 @@ import React, { useState, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 
 export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -23,11 +25,53 @@ export const CreatePostsScreen = ({ navigation }) => {
   const [isButtonActive, setIsButtonActive] = useState(false);
   const [isFieldsEmpty, setIsFieldsEmpty] = useState(true);
 
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [photo, setPhoto] = useState("");
+  const [isPhotoDisplayed, setIsPhotoDisplayed] = useState(false);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
   useEffect(() => {
-    if (isFieldsEmpty === false) {
-      navigation.navigate("PostsScreen");
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
+
+      setHasPermission(status === "granted");
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const createPhoto = async () => {
+    if (isPhotoDisplayed === false) {
+      const temp = await cameraRef.takePictureAsync();
+      setIsPhotoDisplayed(true);
+      console.log(temp.uri);
+      setPhoto(temp.uri);
     }
-  }, [isFieldsEmpty]);
+  };
+
+  const deletePublication = () => {
+    setIsPhotoDisplayed(false);
+    setPhoto("");
+    setTitle("");
+    setPlace("");
+    setIsButtonActive(false);
+    setIsFieldsEmpty(false);
+    setType(Camera.Constants.Type.back);
+    setCameraRef(null);
+  };
+
+  // useEffect(() => {
+  //   if (isFieldsEmpty === false) {
+  //     navigation.navigate("PostsScreen");
+  //   }
+  // }, [isFieldsEmpty]);
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -43,13 +87,14 @@ export const CreatePostsScreen = ({ navigation }) => {
   };
 
   const enableBtn = () => {
-    if (title !== "" && place !== "") {
+    if (title !== "" && place !== "" && photo !== "") {
       setIsButtonActive(true);
     } else setIsButtonActive(false);
   };
 
   const handleSubmit = () => {
-    if (title !== "" && place !== "" && isButtonActive) {
+    if (title !== "" && place !== "" && photo !== "" && isButtonActive) {
+      navigation.navigate("Home", { screen: "PostsScreen" }, { photo });
       reset();
       setIsButtonActive(false);
       setIsFieldsEmpty(false);
@@ -59,6 +104,10 @@ export const CreatePostsScreen = ({ navigation }) => {
   const reset = () => {
     if (title !== "" || place !== "") setPlace("");
     setTitle("");
+    setIsPhotoDisplayed(false);
+    setPhoto("");
+    setType(Camera.Constants.Type.back);
+    setCameraRef(null);
   };
 
   return (
@@ -80,15 +129,55 @@ export const CreatePostsScreen = ({ navigation }) => {
                 style={styles.backBtn}
               />
             </TouchableOpacity>
+
             <Text style={styles.headerText}>Створити публікацію</Text>
           </View>
           <View style={styles.addPhotoContainer}>
-            <View style={styles.photoContainer}>
-              <View style={styles.photoIconContainer}>
-                <FontAwesome name="camera" size={24} color="#BDBDBD" />
-              </View>
-            </View>
-            <Text style={styles.photoText}>Завантажте фото</Text>
+            {/* <View style={styles.photoContainer}> */}
+            {photo ? (
+              <ImageBackground
+                source={{ uri: photo }}
+                style={styles.photoContainer}
+                type={type}
+              >
+                <TouchableOpacity
+                  style={styles.photoIconContainer}
+                  onPress={() => {
+                    createPhoto();
+                    setType(
+                      type === Camera.Constants.Type.back
+                        ? Camera.Constants.Type.front
+                        : Camera.Constants.Type.back
+                    );
+                  }}
+                >
+                  <FontAwesome name="camera" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </ImageBackground>
+            ) : (
+              <Camera style={styles.photoContainer} ref={setCameraRef}>
+                <TouchableOpacity
+                  style={styles.photoIconContainer}
+                  onPress={() => createPhoto()}
+                >
+                  <FontAwesome name="camera" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </Camera>
+            )}
+            {/* <Camera style={styles.photoContainer} ref={setCameraRef}>
+              <TouchableOpacity
+                style={styles.photoIconContainer}
+                onPress={() => createPhoto()}
+              >
+                <FontAwesome name="camera" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </Camera> */}
+            {/* </View> */}
+            {isPhotoDisplayed ? (
+              <Text style={styles.photoText}>Редагувати фото</Text>
+            ) : (
+              <Text style={styles.photoText}>Завантажте фото</Text>
+            )}
           </View>
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
@@ -142,7 +231,10 @@ export const CreatePostsScreen = ({ navigation }) => {
                 Опублікувати
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => reset()}>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => deletePublication()}
+            >
               <FontAwesome5 name="trash-alt" size={24} color="#BDBDBD" />
             </TouchableOpacity>
           </View>
@@ -160,6 +252,7 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     marginBottom: 0,
   },
+  camera: { height: 300 },
   header: {
     position: "relative",
     display: "flex",
@@ -202,13 +295,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6F6F6",
     borderRadius: 8,
   },
+  backPhoto: {},
   photoIconContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     width: 60,
     height: 60,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 100,
   },
   cameraIcon: {

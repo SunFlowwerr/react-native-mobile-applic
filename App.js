@@ -20,7 +20,7 @@ export default function App() {
       style={[styles.container, { backgroundColor: "white" }]}
     >
       <MainStack.Navigator initialRouteName="RegistrationScreen">
-        <MainStack.Screen
+        {/* <MainStack.Screen
           name="RegistrationScreen"
           component={RegistrationScreen}
           options={{ headerShown: false }}
@@ -29,7 +29,7 @@ export default function App() {
           name="LoginScreen"
           component={LoginScreen}
           options={{ headerShown: false }}
-        />
+        /> */}
         <MainStack.Screen
           name="Home"
           component={Home}

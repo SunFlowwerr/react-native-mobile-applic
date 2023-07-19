@@ -5,14 +5,24 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Image,
+  FlatList,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { EvilIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 
-export const PostsScreen = ({ navigation }) => {
+export const PostsScreen = ({ navigation, route }) => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    if (route.params) {
+      setPosts((prevState) => [...prevState, route.params]);
+    }
+  }, [route.params]);
+  console.log(route.params);
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -25,17 +35,44 @@ export const PostsScreen = ({ navigation }) => {
             <Feather name="log-out" size={24} color="#BDBDBD" />
           </TouchableOpacity>
         </View>
-        <ScrollView>
-          <View style={styles.mainContainer}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}></View>
-              <View style={styles.dataContainer}>
-                <Text style={styles.username}>Username</Text>
-                <Text style={styles.gmail}>Gmail</Text>
-              </View>
+        {/* <ScrollView> */}
+        <View style={styles.mainContainer}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}></View>
+            <View style={styles.dataContainer}>
+              <Text style={styles.username}>Username</Text>
+              <Text style={styles.gmail}>Gmail</Text>
             </View>
-            <View style={styles.postsContainer}>
-              <View style={styles.post}>
+          </View>
+          <View style={styles.postsContainer}>
+            <FlatList
+              data={posts}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View>
+                  <Image
+                    style={styles.photoContainer}
+                    source={{ uri: item.photo }}
+                  />
+                  <Text style={styles.photoDescription}>Photo description</Text>
+                  <View style={styles.postInfo}>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("CommentsScreen")}
+                    >
+                      <EvilIcons name="comment" size={30} color="#BDBDBD" />
+                    </TouchableOpacity>
+                    <FontAwesome5
+                      name="map-marker-alt"
+                      size={22}
+                      color="#BDBDBD"
+                      style={styles.mapIcon}
+                    />
+                  </View>
+                </View>
+              )}
+            ></FlatList>
+
+            {/* <View style={styles.post}>
                 <View style={styles.photoContainer}></View>
                 <Text style={styles.photoDescription}>Photo description</Text>
                 <View style={styles.postInfo}>
@@ -51,36 +88,10 @@ export const PostsScreen = ({ navigation }) => {
                     style={styles.mapIcon}
                   />
                 </View>
-              </View>
-              <View style={styles.post}>
-                <View style={styles.photoContainer}></View>
-                <Text style={styles.photoDescription}>Photo description</Text>
-                <View style={styles.postInfo}>
-                  <EvilIcons name="comment" size={30} color="#BDBDBD" />
-                  <FontAwesome5
-                    name="map-marker-alt"
-                    size={22}
-                    color="#BDBDBD"
-                    style={styles.mapIcon}
-                  />
-                </View>
-              </View>
-              <View style={styles.post}>
-                <View style={styles.photoContainer}></View>
-                <Text style={styles.photoDescription}>Photo description</Text>
-                <View style={styles.postInfo}>
-                  <EvilIcons name="comment" size={30} color="#BDBDBD" />
-                  <FontAwesome5
-                    name="map-marker-alt"
-                    size={22}
-                    color="#BDBDBD"
-                    style={styles.mapIcon}
-                  />
-                </View>
-              </View>
-            </View>
+              </View> */}
           </View>
-        </ScrollView>
+        </View>
+        {/* </ScrollView> */}
       </View>
     </TouchableWithoutFeedback>
   );
