@@ -7,7 +7,6 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import { EvilIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -16,13 +15,19 @@ import { useEffect, useState } from "react";
 
 export const PostsScreen = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]);
+  const location = route.params?.location;
 
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
+    if (
+      route.params &&
+      route.params.photo &&
+      route.params.title &&
+      route.params.place
+    ) {
+      setPosts((prevState) => [route.params, ...prevState]);
     }
   }, [route.params]);
-  console.log(route.params);
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -35,7 +40,6 @@ export const PostsScreen = ({ navigation, route }) => {
             <Feather name="log-out" size={24} color="#BDBDBD" />
           </TouchableOpacity>
         </View>
-        {/* <ScrollView> */}
         <View style={styles.mainContainer}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}></View>
@@ -46,52 +50,46 @@ export const PostsScreen = ({ navigation, route }) => {
           </View>
           <View style={styles.postsContainer}>
             <FlatList
+              nestedScrollEnabled={true}
+              style={styles.postsList}
               data={posts}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
-                <View>
+                <View style={{ marginBottom: 32 }}>
                   <Image
                     style={styles.photoContainer}
                     source={{ uri: item.photo }}
                   />
-                  <Text style={styles.photoDescription}>Photo description</Text>
+                  <Text style={styles.photoDescription}>{item.title}</Text>
                   <View style={styles.postInfo}>
                     <TouchableOpacity
                       onPress={() => navigation.navigate("CommentsScreen")}
                     >
                       <EvilIcons name="comment" size={30} color="#BDBDBD" />
                     </TouchableOpacity>
-                    <FontAwesome5
-                      name="map-marker-alt"
-                      size={22}
-                      color="#BDBDBD"
-                      style={styles.mapIcon}
-                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("MapScreen", {
+                          location: location,
+                        })
+                      }
+                    >
+                      <View style={styles.mapContainer}>
+                        <FontAwesome5
+                          name="map-marker-alt"
+                          size={22}
+                          color="#BDBDBD"
+                          style={styles.mapIcon}
+                        />
+                        <Text style={styles.photoLocation}>{item.place}</Text>
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               )}
-            ></FlatList>
-
-            {/* <View style={styles.post}>
-                <View style={styles.photoContainer}></View>
-                <Text style={styles.photoDescription}>Photo description</Text>
-                <View style={styles.postInfo}>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("CommentsScreen")}
-                  >
-                    <EvilIcons name="comment" size={30} color="#BDBDBD" />
-                  </TouchableOpacity>
-                  <FontAwesome5
-                    name="map-marker-alt"
-                    size={22}
-                    color="#BDBDBD"
-                    style={styles.mapIcon}
-                  />
-                </View>
-              </View> */}
+            />
           </View>
         </View>
-        {/* </ScrollView> */}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -181,7 +179,7 @@ const styles = StyleSheet.create({
     height: 240,
     marginBottom: 8,
     borderWidth: 1,
-    borderStyle: "solid",
+    // borderStyle: "solid",
     borderColor: "#BDBDBD",
     backgroundColor: "#BDBDBD",
     borderRadius: 8,
@@ -236,5 +234,20 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#FFFFFF",
     transform: [{ translateY: -0.5 }],
+  },
+  mapContainer: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 8,
+  },
+  photoLocation: {
+    display: "flex",
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: 400,
+  },
+  postsList: {
+    display: "flex",
+    gap: 32,
   },
 });

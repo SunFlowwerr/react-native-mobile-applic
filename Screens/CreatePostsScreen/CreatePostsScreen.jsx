@@ -16,6 +16,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
 
 export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -31,6 +32,24 @@ export const CreatePostsScreen = ({ navigation }) => {
   const [isPhotoDisplayed, setIsPhotoDisplayed] = useState(false);
   const [type, setType] = useState(Camera.Constants.Type.back);
 
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setLocation(coords);
+    })();
+  }, []);
+
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -38,7 +57,14 @@ export const CreatePostsScreen = ({ navigation }) => {
 
       setHasPermission(status === "granted");
     })();
-  }, []);
+
+    async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
+    };
+  });
 
   if (hasPermission === null) {
     return <View />;
@@ -51,7 +77,6 @@ export const CreatePostsScreen = ({ navigation }) => {
     if (isPhotoDisplayed === false) {
       const temp = await cameraRef.takePictureAsync();
       setIsPhotoDisplayed(true);
-      console.log(temp.uri);
       setPhoto(temp.uri);
     }
   };
@@ -66,12 +91,6 @@ export const CreatePostsScreen = ({ navigation }) => {
     setType(Camera.Constants.Type.back);
     setCameraRef(null);
   };
-
-  // useEffect(() => {
-  //   if (isFieldsEmpty === false) {
-  //     navigation.navigate("PostsScreen");
-  //   }
-  // }, [isFieldsEmpty]);
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -94,7 +113,10 @@ export const CreatePostsScreen = ({ navigation }) => {
 
   const handleSubmit = () => {
     if (title !== "" && place !== "" && photo !== "" && isButtonActive) {
-      navigation.navigate("Home", { screen: "PostsScreen" }, { photo });
+      navigation.navigate("Home", {
+        screen: "PostsScreen",
+        params: { photo, title, place, location },
+      });
       reset();
       setIsButtonActive(false);
       setIsFieldsEmpty(false);
@@ -133,7 +155,6 @@ export const CreatePostsScreen = ({ navigation }) => {
             <Text style={styles.headerText}>Створити публікацію</Text>
           </View>
           <View style={styles.addPhotoContainer}>
-            {/* <View style={styles.photoContainer}> */}
             {photo ? (
               <ImageBackground
                 source={{ uri: photo }}
@@ -164,15 +185,6 @@ export const CreatePostsScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </Camera>
             )}
-            {/* <Camera style={styles.photoContainer} ref={setCameraRef}>
-              <TouchableOpacity
-                style={styles.photoIconContainer}
-                onPress={() => createPhoto()}
-              >
-                <FontAwesome name="camera" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-            </Camera> */}
-            {/* </View> */}
             {isPhotoDisplayed ? (
               <Text style={styles.photoText}>Редагувати фото</Text>
             ) : (

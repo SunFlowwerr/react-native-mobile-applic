@@ -9,6 +9,7 @@ import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Home } from "./Screens/Home";
+import { MapScreen } from "./Screens/MapScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 const MainStack = createStackNavigator();
@@ -20,7 +21,7 @@ export default function App() {
       style={[styles.container, { backgroundColor: "white" }]}
     >
       <MainStack.Navigator initialRouteName="RegistrationScreen">
-        {/* <MainStack.Screen
+        <MainStack.Screen
           name="RegistrationScreen"
           component={RegistrationScreen}
           options={{ headerShown: false }}
@@ -29,7 +30,7 @@ export default function App() {
           name="LoginScreen"
           component={LoginScreen}
           options={{ headerShown: false }}
-        /> */}
+        />
         <MainStack.Screen
           name="Home"
           component={Home}
@@ -38,6 +39,11 @@ export default function App() {
         <MainStack.Screen
           name="CommentsScreen"
           component={CommentsScreen}
+          options={{ headerShown: false }}
+        />
+        <MainStack.Screen
+          name="MapScreen"
+          component={MapScreen}
           options={{ headerShown: false }}
         />
       </MainStack.Navigator>
