@@ -10,7 +10,9 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import { authSignInUser } from "../../redux/auth/authOperations";
 
 export const LoginScreen = () => {
   const navigation = useNavigation();
@@ -23,6 +25,8 @@ export const LoginScreen = () => {
   const [changePasswordColor, setChangePasswordColor] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [isFieldsEmpty, setIsFieldsEmpty] = useState(true);
+
+  const dispatch = useDispatch();
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -75,6 +79,7 @@ export const LoginScreen = () => {
   const handleSubmit = () => {
     if (email !== "" && password !== "" && isValidEmail(email)) {
       console.log(email, password);
+      dispatch(authSignInUser({ email, password }));
       setIsFieldsEmpty(false);
       reset();
       navigation.navigate("Home", { screen: "PostsScreen" });

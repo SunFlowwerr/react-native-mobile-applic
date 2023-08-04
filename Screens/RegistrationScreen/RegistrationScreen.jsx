@@ -10,6 +10,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { authSignUpUser } from "../../redux/auth/authOperations";
 
 export const RegistrationScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
@@ -23,6 +25,8 @@ export const RegistrationScreen = ({ navigation }) => {
   const [changeEmailColor, setChangeEmailColor] = useState(false);
   const [changePasswordColor, setChangePasswordColor] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  const dispatch = useDispatch();
 
   const behavior = Platform.OS === "ios" ? "padding" : "height";
   const keyboardVerticalOffset = Platform.OS === "ios" ? -120 : -100;
@@ -92,6 +96,7 @@ export const RegistrationScreen = ({ navigation }) => {
       isValidEmail(email)
     ) {
       console.log(login, email, password);
+      dispatch(authSignUpUser({ email, password, login }));
       reset();
       navigation.navigate("Home", { screen: "PostsScreen" });
     }
