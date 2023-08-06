@@ -21,15 +21,44 @@ export const Main = () => {
 
   console.log(email, displayName);
 
-  useEffect(() => {
-    dispatch(authStateChanged());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(authStateChanged());
+  // }, []);
 
   return (
     <NavigationContainer
       style={[styles.container, { backgroundColor: "white" }]}
     >
-      {email !== null && displayName !== null ? (
+      <MainStack.Navigator initialRouteName="RegistrationScreen">
+        <MainStack.Screen
+          name="RegistrationScreen"
+          component={RegistrationScreen}
+          options={{ headerShown: false }}
+        />
+        <MainStack.Screen
+          name="LoginScreen"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <MainStack.Screen
+          name="Home"
+          component={Home}
+          options={{ headerShown: false }}
+        />
+        <MainStack.Screen
+          name="CommentsScreen"
+          component={CommentsScreen}
+          options={{ headerShown: false }}
+        />
+        <MainStack.Screen
+          name="MapScreen"
+          component={MapScreen}
+          options={{ headerShown: false }}
+        />
+      </MainStack.Navigator>
+    </NavigationContainer>
+  );
+  /* {email !== null && displayName !== null ? (
         <MainStack.Navigator initialRouteName="Home">
           <MainStack.Screen
             name="RegistrationScreen"
@@ -86,8 +115,7 @@ export const Main = () => {
           />
         </MainStack.Navigator>
       )}
-    </NavigationContainer>
-  );
+    </NavigationContainer> */
 };
 
 const styles = StyleSheet.create({

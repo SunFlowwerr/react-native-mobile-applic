@@ -13,17 +13,6 @@ const MainStack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  // const authStateChanged = async (onChange = () => {}) => {
-  //   onAuthStateChanged((user) => {
-  //     onChange(user);
-  //     setUser(user);
-  //     console.log(user);
-  //   });
-  // };
-
-  authStateChanged();
-
   return (
     <Provider store={store}>
       <Main></Main>
