@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   updateProfile,
+  signOut,
 } from "firebase/auth";
 import { auth } from "../../firebase/config";
 import { authSlice } from "./authReducer";
@@ -25,7 +26,8 @@ export const authSignUpUser =
       dispatch(
         authSlice.actions.updateUserProfile({
           userId: currentUser.uid,
-          nickname: currentUser.displayName,
+          email: email,
+          displayName: login,
         })
       );
     } catch (error) {
@@ -35,7 +37,7 @@ export const authSignUpUser =
   };
 
 export const authSignInUser =
-  ({ email, password }) =>
+  ({ email, password, login }) =>
   async (dispatch, getState) => {
     try {
       const credentials = await signInWithEmailAndPassword(
@@ -43,7 +45,14 @@ export const authSignInUser =
         email,
         password
       );
-      dispatch(authSlice.actions.updateUserProfile({ userId: user.uid }));
+
+      dispatch(
+        authSlice.actions.updateUserProfile({
+          userId: user.uid,
+          email: email,
+          displayName: login,
+        })
+      );
       console.log(credentials.user);
       return credentials.user;
     } catch (error) {
@@ -51,22 +60,54 @@ export const authSignInUser =
     }
   };
 
-// const authStateChanged = async (onChange = () => {}) => {
-//   onAuthStateChanged((user) => {
-//     onChange(user);
-//   });
-// };
+export const authStateChanged = () => async (dispatch, getState) => {
+  try {
+    const user = await new Promise((resolve, reject) => {
+      onAuthStateChanged(
+        auth,
+        (user) => {
+          resolve(user);
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
 
-// const updateUserProfile = async (update) => {
-//   const user = auth.currentUser;
+    if (user) {
+      dispatch(
+        authSlice.actions.updateUserProfile({
+          userId: user.uid,
+          nickname: user.displayName,
+        })
+      );
+      dispatch(
+        authSlice.actions.authStateChange({
+          stateChange: true,
+        })
+      );
+    }
+  } catch (error) {
+    console.log("Error in authStateChanged:", error);
+  }
+};
 
-//   // якщо такий користувач знайдений
-//   if (user) {
-//     // оновлюємо його профайл
-//     try {
-//       await updateProfile(user, update);
-//     } catch (error) {
-//       throw error;
-//     }
-//   }
-// };
+export const authSignOutUser = () => async (dispatch, getState) => {
+  try {
+    await signOut(auth);
+    dispatch(
+      authSlice.actions.updateUserProfile({
+        userId: null,
+        email: null,
+        displayName: null,
+      })
+    );
+    dispatch(
+      authSlice.actions.authStateChange({
+        stateChange: false,
+      })
+    );
+  } catch (error) {
+    throw error;
+  }
+};

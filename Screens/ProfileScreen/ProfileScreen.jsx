@@ -10,120 +10,58 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { Feather } from "@expo/vector-icons";
+import { authSignOutUser } from "../../redux/auth/authOperations";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 
 export const ProfileScreen = ({ navigation }) => {
-  const [login, setLogin] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isVisiblePassword, setIsVisiblePassword] = useState(false);
-  const [isFocusedLogin, setIsFocusedLogin] = useState(false);
-  const [isFocusedEmail, setIsFocusedEmail] = useState(false);
-  const [isFocusedPassword, setIsFocusedPassword] = useState(false);
-  const [changeLoginColor, setChangeLoginColor] = useState(false);
-  const [changeEmailColor, setChangeEmailColor] = useState(false);
-  const [changePasswordColor, setChangePasswordColor] = useState(false);
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [photo, setPhoto] = useState("");
+  const [isPhotoDisplayed, setIsPhotoDisplayed] = useState(false);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+  const dispatch = useDispatch();
 
-  const handleFocus = (variant) => {
-    switch (variant) {
-      case "login":
-        setIsFocusedLogin(true);
-        break;
-      case "email":
-        setIsFocusedEmail(true);
-        break;
-      case "password":
-        setIsFocusedPassword(true);
-        break;
-      default:
-        break;
-    }
-  };
+  const { displayName } = useSelector((state) => state.auth);
 
-  const toggleVisibility = () => {
-    setIsVisiblePassword(!isVisiblePassword);
-  };
-
-  const handleBlur = (variant) => {
-    switch (variant) {
-      case "login":
-        setIsFocusedLogin(false);
-        break;
-      case "email":
-        setIsFocusedEmail(false);
-        break;
-      case "password":
-        setIsFocusedPassword(false);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const changeColor = (variant) => {
-    switch (variant) {
-      case "login":
-        setChangeLoginColor(true);
-        break;
-      case "email":
-        setChangeEmailColor(true);
-        break;
-      case "password":
-        setChangePasswordColor(true);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleSubmit = () => {
-    if (
-      login !== "" &&
-      email !== "" &&
-      password !== "" &&
-      isValidEmail(email)
-    ) {
-      console.log(login, email, password);
-      reset();
-    }
-
-    reset();
-  };
-
-  const reset = () => {
-    setLogin("");
-    setEmail("");
-    setPassword("");
-  };
-
-  const handleKeyboardShow = () => {
-    setKeyboardVisible(true);
-  };
-
-  const handleKeyboardHide = () => {
-    setKeyboardVisible(false);
+  const logOut = () => {
+    navigation.navigate("RegistrationScreen");
+    dispatch(authSignOutUser());
   };
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      handleKeyboardShow
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      handleKeyboardHide
-    );
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
 
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
+      setHasPermission(status === "granted");
+    })();
+
+    async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
     };
-  }, []);
+  });
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const createPhoto = async () => {
+    if (isPhotoDisplayed === false) {
+      const temp = await cameraRef.takePictureAsync();
+      setIsPhotoDisplayed(true);
+      setPhoto(temp.uri);
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -134,6 +72,17 @@ export const ProfileScreen = ({ navigation }) => {
         >
           <View style={[styles.container]}>
             <View style={styles.avatarContainer}>
+              {/* <Camera style={styles.avatar} ref={setCameraRef}>
+                <TouchableOpacity
+                  style={styles.addBtn}
+                  onPress={() => createPhoto}
+                >
+                  <View style={styles.plusIcon}>
+                    <View style={styles.vertical} />
+                    <View style={styles.horizontal} />
+                  </View>
+                </TouchableOpacity>
+              </Camera> */}
               <View style={styles.avatar}>
                 <TouchableOpacity style={styles.addBtn}>
                   <View style={styles.plusIcon}>
@@ -143,6 +92,10 @@ export const ProfileScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+            <TouchableOpacity style={styles.logOutBtn} onPress={() => logOut()}>
+              <Feather name="log-out" size={24} color="#BDBDBD" />
+            </TouchableOpacity>
+            <Text style={styles.title}>{displayName}</Text>
           </View>
         </ImageBackground>
       </View>
@@ -157,6 +110,20 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingBottom: 0,
   },
+  logOutBtn: {
+    position: "absolute",
+    top: 22,
+    right: 30,
+    width: 24,
+    height: 24,
+  },
+  title: {
+    padding: 0,
+    margin: 0,
+    marginTop: 92,
+    fontSize: 30,
+    fontWeight: 500,
+  },
   bgImg: {
     flex: 1,
     resizeMode: "cover",
@@ -167,7 +134,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
     gap: 43,
     width: "100%",
     height: 549,
@@ -183,7 +150,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     position: "relative",
-    width: 132,
+    width: 120,
     height: 120,
     borderRadius: 16,
     backgroundColor: "#F6F6F6",
@@ -193,7 +160,8 @@ const styles = StyleSheet.create({
     bottom: 14,
     justifyContent: "center",
     alignItems: "center",
-    left: 119.5,
+    // left: 119.5,
+    left: 108,
     width: 25,
     height: 25,
     borderWidth: 1,
@@ -223,76 +191,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#FF6C00",
     transform: [{ translateY: -0.5 }],
-  },
-  title: {
-    padding: 0,
-    margin: 0,
-    marginTop: 92,
-    fontSize: 30,
-    fontWeight: 500,
-  },
-  inputContainer: {
-    display: "flex",
-    gap: 16,
-    marginTop: 0,
-    width: 343,
-  },
-  input: {
-    height: 50,
-    padding: 16,
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "#E8E8E8",
-    borderRadius: 5,
-    backgroundColor: "#F6F6F6",
-    color: "#E8E8E8",
-    fontSize: 16,
-  },
-  focusInput: {
-    backgroundColor: "#fff",
-    borderColor: "#FF6C00",
-    color: "#212121",
-  },
-  changeInput: {
-    color: "#212121",
-  },
-  passwordContainer: {
-    position: "relative",
-    width: 343,
-  },
-  showPasswordButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    paddingRight: 16,
-  },
-
-  btnContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    gap: 16,
-  },
-  button: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: 0,
-    width: 343,
-    height: 51,
-    borderRadius: 100,
-    backgroundColor: "#FF6C00",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-  },
-  logIn: {
-    margin: 0,
-    color: "#1B4371",
-    fontSize: 16,
   },
 });

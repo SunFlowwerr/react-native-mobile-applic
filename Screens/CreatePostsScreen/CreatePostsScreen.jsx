@@ -17,6 +17,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
+import { store, db } from "../../firebase/config";
+import { ref, uploadBytes } from "firebase/storage";
+import { useSelector } from "react-redux";
 
 export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -33,6 +36,48 @@ export const CreatePostsScreen = ({ navigation }) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
 
   const [location, setLocation] = useState(null);
+
+  const { displayName, userId } = useSelector((state) => state.auth);
+
+  const uploadPostsToServer = async (
+    title,
+    place,
+    displayName,
+    userId,
+    photo
+  ) => {
+    try {
+      const processedPhoto = await uploadPhotoToServer(photo);
+
+      await db.collection("posts").add({
+        photo: processedPhoto,
+        title,
+        place,
+        displayName,
+        userId,
+      });
+
+      console.log("Post uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading post:", error);
+    }
+  };
+
+  const uploadPhotoToServer = async (photo) => {
+    try {
+      const response = await fetch(photo);
+      const file = await response.blob();
+
+      const uniquePostId = Date.now().toString();
+
+      const storageRef = ref(store, `postImage/${uniquePostId}`);
+      await uploadBytes(storageRef, file);
+
+      console.log("Photo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -106,7 +151,7 @@ export const CreatePostsScreen = ({ navigation }) => {
   };
 
   const enableBtn = () => {
-    if (title !== "" && place !== "" && photo !== "") {
+    if (title !== "" && place !== "" && isPhotoDisplayed) {
       setIsButtonActive(true);
     } else setIsButtonActive(false);
   };
@@ -117,6 +162,9 @@ export const CreatePostsScreen = ({ navigation }) => {
         screen: "PostsScreen",
         params: { photo, title, place, location },
       });
+      // uploadPhotoToServer(photo);
+      console.log(title, place);
+      uploadPostsToServer(title, place, displayName, userId, photo);
       reset();
       setIsButtonActive(false);
       setIsFieldsEmpty(false);
@@ -334,8 +382,12 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     display: "flex",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 16,
     marginTop: 32,
+    marginBottom: 32,
   },
   inputAddress: {
     position: "relative",

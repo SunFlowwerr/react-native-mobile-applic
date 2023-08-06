@@ -12,10 +12,25 @@ import { EvilIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { authSignOutUser } from "../../redux/auth/authOperations";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 export const PostsScreen = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]);
   const location = route.params?.location;
+  const dispatch = useDispatch();
+
+  const { email, displayName } = useSelector((state) => state.auth);
+
+  const logOut = () => {
+    dispatch(authSignOutUser());
+    navigateToRegistrationScreen();
+  };
+
+  const navigateToRegistrationScreen = () => {
+    navigation.navigate("RegistrationScreen");
+  };
 
   useEffect(() => {
     if (
@@ -33,10 +48,7 @@ export const PostsScreen = ({ navigation, route }) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerText}>Публікації</Text>
-          <TouchableOpacity
-            style={styles.logOutBtn}
-            onPress={() => navigation.navigate("RegistrationScreen")}
-          >
+          <TouchableOpacity style={styles.logOutBtn} onPress={() => logOut()}>
             <Feather name="log-out" size={24} color="#BDBDBD" />
           </TouchableOpacity>
         </View>
@@ -44,8 +56,8 @@ export const PostsScreen = ({ navigation, route }) => {
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}></View>
             <View style={styles.dataContainer}>
-              <Text style={styles.username}>Username</Text>
-              <Text style={styles.gmail}>Gmail</Text>
+              <Text style={styles.username}>{displayName}</Text>
+              <Text style={styles.gmail}>{email}</Text>
             </View>
           </View>
           <View style={styles.postsContainer}>
@@ -55,7 +67,7 @@ export const PostsScreen = ({ navigation, route }) => {
               data={posts}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
-                <View style={{ marginBottom: 32 }}>
+                <View style={styles.cont}>
                   <Image
                     style={styles.photoContainer}
                     source={{ uri: item.photo }}
@@ -102,6 +114,9 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 0,
     marginBottom: 0,
+  },
+  cont: {
+    marginBottom: 32,
   },
   header: {
     position: "relative",
@@ -249,5 +264,6 @@ const styles = StyleSheet.create({
   postsList: {
     display: "flex",
     gap: 32,
+    flexGrow: 1,
   },
 });

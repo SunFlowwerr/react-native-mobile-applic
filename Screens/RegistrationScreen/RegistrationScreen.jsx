@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { authSignUpUser } from "../../redux/auth/authOperations";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 
 export const RegistrationScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
@@ -26,10 +28,58 @@ export const RegistrationScreen = ({ navigation }) => {
   const [changePasswordColor, setChangePasswordColor] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [photo, setPhoto] = useState("");
+  const [isPhotoDisplayed, setIsPhotoDisplayed] = useState(false);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
   const dispatch = useDispatch();
 
   const behavior = Platform.OS === "ios" ? "padding" : "height";
   const keyboardVerticalOffset = Platform.OS === "ios" ? -120 : -100;
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await Camera.requestCameraPermissionsAsync();
+  //     await MediaLibrary.requestPermissionsAsync();
+
+  //     setHasPermission(status === "granted");
+  //   })();
+
+  //   async () => {
+  //     let { status } = await Location.requestPermissionsAsync();
+  //     if (status !== "granted") {
+  //       console.log("Permission to access location was denied");
+  //     }
+  //   };
+  // });
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const createPhoto = async () => {
+    if (isPhotoDisplayed === false) {
+      const temp = await cameraRef.takePictureAsync();
+      setIsPhotoDisplayed(true);
+      setPhoto(temp.uri);
+    }
+  };
+
+  const deletePublication = () => {
+    setIsPhotoDisplayed(false);
+    setPhoto("");
+    setTitle("");
+    setPlace("");
+    setIsButtonActive(false);
+    setIsFieldsEmpty(false);
+    setType(Camera.Constants.Type.back);
+    setCameraRef(null);
+  };
 
   const handleFocus = (variant) => {
     switch (variant) {
@@ -98,7 +148,9 @@ export const RegistrationScreen = ({ navigation }) => {
       console.log(login, email, password);
       dispatch(authSignUpUser({ email, password, login }));
       reset();
-      navigation.navigate("Home", { screen: "PostsScreen" });
+      navigation.navigate("Home", {
+        screen: "PostsScreen",
+      });
     }
 
     reset();
@@ -131,6 +183,19 @@ export const RegistrationScreen = ({ navigation }) => {
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
+      (async () => {
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        await MediaLibrary.requestPermissionsAsync();
+
+        setHasPermission(status === "granted");
+      })();
+
+      async () => {
+        let { status } = await Location.requestPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+        }
+      };
     };
   }, []);
 
@@ -154,7 +219,18 @@ export const RegistrationScreen = ({ navigation }) => {
                 // !isKeyboardVisible ? styles.closeKeyBoardContainer : null,
               ]}
             >
-              <View style={styles.avatarContainer}>
+              <Camera style={styles.avatarContainer} ref={setCameraRef}>
+                <TouchableOpacity
+                  style={styles.addBtn}
+                  onPress={() => createPhoto()}
+                >
+                  <View style={styles.plusIcon}>
+                    <View style={styles.vertical} />
+                    <View style={styles.horizontal} />
+                  </View>
+                </TouchableOpacity>
+              </Camera>
+              {/* <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
                   <TouchableOpacity style={styles.addBtn}>
                     <View style={styles.plusIcon}>
@@ -163,7 +239,7 @@ export const RegistrationScreen = ({ navigation }) => {
                     </View>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </View> */}
               <View style={styles.titleContainer}>
                 <Text style={styles.title}>Реєстрація</Text>
               </View>
