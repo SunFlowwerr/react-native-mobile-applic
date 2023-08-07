@@ -62,8 +62,6 @@ export const CommentsScreen = ({ navigation, route }) => {
       const commentsList = comments.docs.map((doc) => doc.data());
 
       setComments(commentsList);
-
-      console.log(commentsList);
     } catch (error) {
       console.error("Error fetching comments:", error.message);
       throw error;
@@ -72,75 +70,81 @@ export const CommentsScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getComments(postId);
+    console.log(uri);
   });
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Home", { screen: "PostsScreen" })
-            }
-          >
-            <Ionicons
-              name="ios-arrow-back-outline"
-              size={24}
-              color="black"
-              style={styles.backBtn}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Коментарі</Text>
-        </View>
-        <View style={styles.mainContainer}>
-          <View style={styles.addPhotoContainer}>
-            <Image style={styles.photoContainer} source={{ uri }}>
-              {/* <View style={styles.photoIconContainer}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Home", { screen: "PostsScreen" })
+              }
+            >
+              <Ionicons
+                name="ios-arrow-back-outline"
+                size={24}
+                color="black"
+                style={styles.backBtn}
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerText}>Коментарі</Text>
+          </View>
+          <View style={styles.mainContainer}>
+            <View style={styles.addPhotoContainer}>
+              <Image style={styles.photoContainer} source={{ uri }}>
+                {/* <View style={styles.photoIconContainer}>
                 <Image
                   source={require("../images/camera.jpg")}
                   style={styles.cameraIcon}
                 ></Image>
               </View> */}
-            </Image>
-          </View>
-          {/* <View>
+              </Image>
+            </View>
+            {/* <View>
             {comments.map((comment) => (
               <View key={comment.id} style={styles.messageBoxContainer}>
                 <Text>{comment.text}</Text>
               </View>
             ))}
           </View> */}
-          <FlatList
-            nestedScrollEnabled={true}
-            style={styles.postsList}
-            data={comments}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.messageBoxContainer}>
-                <Text>{item.message}</Text>
+            <FlatList
+              nestedScrollEnabled={true}
+              style={styles.postsList}
+              data={comments}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.messageBoxContainer}>
+                  <Text>{item.message}</Text>
+                </View>
+              )}
+            />
+            <View style={styles.inputContainer}>
+              <View style={styles.messageContainer}>
+                <TextInput
+                  onChangeText={(newText) => setMessage(newText)}
+                  placeholder="Коментувати..."
+                  defaultValue={message}
+                  cursorColor={"#212121"}
+                  style={styles.input}
+                />
+                <TouchableOpacity
+                  style={styles.sendMessageBtn}
+                  onPress={() => createComment(postId, message, displayName)}
+                >
+                  <AntDesign name="arrowup" size={20} color="white" />
+                </TouchableOpacity>
               </View>
-            )}
-          />
-          <View style={styles.inputContainer}>
-            <View style={styles.messageContainer}>
-              <TextInput
-                onChangeText={(newText) => setMessage(newText)}
-                placeholder="Коментувати..."
-                defaultValue={message}
-                cursorColor={"#212121"}
-                style={styles.input}
-              />
-              <TouchableOpacity
-                style={styles.sendMessageBtn}
-                onPress={() => createComment(postId, message, displayName)}
-              >
-                <AntDesign name="arrowup" size={20} color="white" />
-              </TouchableOpacity>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -151,6 +155,12 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 0,
     marginBottom: 0,
+  },
+  postsList: {
+    display: "flex",
+    gap: 32,
+    marginTop: 20,
+    flexGrow: 1,
   },
   header: {
     display: "flex",
@@ -220,6 +230,8 @@ const styles = StyleSheet.create({
     width: 299,
     minHeight: 70,
     backgroundColor: "#F6F6F6",
+    marginBottom: 15,
+    padding: 7,
   },
   inputContainer: {
     position: "absolute",
