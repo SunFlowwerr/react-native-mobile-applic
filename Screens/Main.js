@@ -11,12 +11,14 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { authStateChanged } from "../redux/auth/authOperations";
+import { auth } from "../firebase/config";
 
 const MainStack = createStackNavigator();
-const Tabs = createBottomTabNavigator();
 
 export const Main = () => {
   const { email, displayName } = useSelector((state) => state.auth);
+  const currentUser = auth.currentUser;
+  console.log(currentUser);
   const dispatch = useDispatch();
 
   console.log(email, displayName);
@@ -29,36 +31,7 @@ export const Main = () => {
     <NavigationContainer
       style={[styles.container, { backgroundColor: "white" }]}
     >
-      <MainStack.Navigator initialRouteName="RegistrationScreen">
-        <MainStack.Screen
-          name="RegistrationScreen"
-          component={RegistrationScreen}
-          options={{ headerShown: false }}
-        />
-        <MainStack.Screen
-          name="LoginScreen"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <MainStack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        />
-        <MainStack.Screen
-          name="CommentsScreen"
-          component={CommentsScreen}
-          options={{ headerShown: false }}
-        />
-        <MainStack.Screen
-          name="MapScreen"
-          component={MapScreen}
-          options={{ headerShown: false }}
-        />
-      </MainStack.Navigator>
-    </NavigationContainer>
-  );
-  /* {email !== null && displayName !== null ? (
+      {email && displayName ? (
         <MainStack.Navigator initialRouteName="Home">
           <MainStack.Screen
             name="RegistrationScreen"
@@ -87,7 +60,7 @@ export const Main = () => {
           />
         </MainStack.Navigator>
       ) : (
-        <MainStack.Navigator initialRouteName="RegistrationScreen">
+        <MainStack.Navigator initialRouteName="LoginScreen">
           <MainStack.Screen
             name="RegistrationScreen"
             component={RegistrationScreen}
@@ -115,7 +88,8 @@ export const Main = () => {
           />
         </MainStack.Navigator>
       )}
-    </NavigationContainer> */
+    </NavigationContainer>
+  );
 };
 
 const styles = StyleSheet.create({

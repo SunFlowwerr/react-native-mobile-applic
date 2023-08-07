@@ -27,10 +27,19 @@ export const ProfileScreen = ({ navigation }) => {
 
   const { displayName } = useSelector((state) => state.auth);
 
-  const logOut = () => {
-    navigation.navigate("RegistrationScreen");
-    dispatch(authSignOutUser());
+  const { stateChange } = useSelector((state) => state.auth);
+
+  const handleLogout = () => {
+    if (!stateChange) {
+      dispatch(authSignOutUser());
+      navigation.navigate("RegistrationScreen");
+    }
   };
+
+  // const logOut = () => {
+  //   navigation.navigate("RegistrationScreen");
+  //   dispatch(authSignOutUser());
+  // };
 
   useEffect(() => {
     (async () => {
@@ -92,7 +101,10 @@ export const ProfileScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity style={styles.logOutBtn} onPress={() => logOut()}>
+            <TouchableOpacity
+              style={styles.logOutBtn}
+              onPress={() => handleLogout()}
+            >
               <Feather name="log-out" size={24} color="#BDBDBD" />
             </TouchableOpacity>
             <Text style={styles.title}>{displayName}</Text>

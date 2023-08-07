@@ -219,7 +219,7 @@ export const RegistrationScreen = ({ navigation }) => {
                 // !isKeyboardVisible ? styles.closeKeyBoardContainer : null,
               ]}
             >
-              <Camera style={styles.avatarContainer} ref={setCameraRef}>
+              {/* <Camera style={styles.avatarContainer} ref={setCameraRef}>
                 <TouchableOpacity
                   style={styles.addBtn}
                   onPress={() => createPhoto()}
@@ -229,8 +229,8 @@ export const RegistrationScreen = ({ navigation }) => {
                     <View style={styles.horizontal} />
                   </View>
                 </TouchableOpacity>
-              </Camera>
-              {/* <View style={styles.avatarContainer}>
+              </Camera> */}
+              <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
                   <TouchableOpacity style={styles.addBtn}>
                     <View style={styles.plusIcon}>
@@ -239,7 +239,7 @@ export const RegistrationScreen = ({ navigation }) => {
                     </View>
                   </TouchableOpacity>
                 </View>
-              </View> */}
+              </View>
               <View style={styles.titleContainer}>
                 <Text style={styles.title}>Реєстрація</Text>
               </View>
@@ -350,9 +350,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
   },
-  // openKeyBoardContainer: {
-  //   bottom: 98,
-  // },
   closeKeyBoardContainer: {
     bottom: 0,
   },

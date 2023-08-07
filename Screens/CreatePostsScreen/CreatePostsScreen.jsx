@@ -20,6 +20,7 @@ import * as Location from "expo-location";
 import { store, db } from "../../firebase/config";
 import { ref, uploadBytes } from "firebase/storage";
 import { useSelector } from "react-redux";
+import { collection } from "firebase/firestore";
 
 export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -49,7 +50,7 @@ export const CreatePostsScreen = ({ navigation }) => {
     try {
       const processedPhoto = await uploadPhotoToServer(photo);
 
-      await db.collection("posts").add({
+      await collection(db, "posts").add({
         photo: processedPhoto,
         title,
         place,
