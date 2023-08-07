@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import { authSignOutUser } from "../../redux/auth/authOperations";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { db } from "../../firebase/config";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 
 export const PostsScreen = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]);
@@ -25,23 +27,22 @@ export const PostsScreen = ({ navigation, route }) => {
 
   const logOut = () => {
     dispatch(authSignOutUser());
-    navigateToRegistrationScreen();
-  };
-
-  const navigateToRegistrationScreen = () => {
     navigation.navigate("RegistrationScreen");
   };
 
+  const getAllPosts = async () => {
+    const docRef = collection(db, "posts");
+    const docSnap = await getDocs(docRef);
+    const postsList = docSnap.docs.map((doc) => doc.data());
+
+    setPosts(postsList);
+
+    console.log(postsList);
+  };
+
   useEffect(() => {
-    if (
-      route.params &&
-      route.params.photo &&
-      route.params.title &&
-      route.params.place
-    ) {
-      setPosts((prevState) => [route.params, ...prevState]);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -75,7 +76,12 @@ export const PostsScreen = ({ navigation, route }) => {
                   <Text style={styles.photoDescription}>{item.title}</Text>
                   <View style={styles.postInfo}>
                     <TouchableOpacity
-                      onPress={() => navigation.navigate("CommentsScreen")}
+                      onPress={() =>
+                        navigation.navigate("CommentsScreen", {
+                          uri: item.photo,
+                          postId: item.postId,
+                        })
+                      }
                     >
                       <EvilIcons name="comment" size={30} color="#BDBDBD" />
                     </TouchableOpacity>

@@ -23,9 +23,9 @@ export const Main = () => {
 
   console.log(email, displayName);
 
-  // useEffect(() => {
-  //   dispatch(authStateChanged());
-  // }, []);
+  useEffect(() => {
+    dispatch(authStateChanged());
+  }, []);
 
   return (
     <NavigationContainer

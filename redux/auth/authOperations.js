@@ -15,7 +15,8 @@ export const authSignUpUser =
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
+        login
       );
       const user = userCredential.user;
 
@@ -33,7 +34,7 @@ export const authSignUpUser =
   };
 
 export const authSignInUser =
-  ({ email, password, login }) =>
+  ({ email, password }) =>
   async (dispatch) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -48,7 +49,7 @@ export const authSignInUser =
           authSlice.actions.updateUserProfile({
             userId: user.uid,
             email: email,
-            displayName: login,
+            displayName: user.login,
           })
         );
       }
@@ -58,40 +59,39 @@ export const authSignInUser =
     }
   };
 
-// export const authStateChanged = () => async (dispatch) => {
-//   try {
-//     onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         dispatch(
-//           authSlice.actions.updateUserProfile({
-//             userId: user.uid,
-//             nickname: user.displayName,
-//           })
-//         );
-//         dispatch(
-//           authSlice.actions.authStateChange({
-//             stateChange: true,
-//           })
-//         );
-//       } else {
-
-//         dispatch(
-//           authSlice.actions.updateUserProfile({
-//             userId: null,
-//             nickname: null,
-//           })
-//         );
-//         dispatch(
-//           authSlice.actions.authStateChange({
-//             stateChange: false,
-//           })
-//         );
-//       }
-//     });
-//   } catch (error) {
-//     console.log("Ошибка в функции authStateChanged:", error);
-//   }
-// };
+export const authStateChanged = () => async (dispatch) => {
+  try {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        dispatch(
+          authSlice.actions.updateUserProfile({
+            userId: user.uid,
+            displayName: user.displayName,
+          })
+        );
+        dispatch(
+          authSlice.actions.authStateChange({
+            stateChange: true,
+          })
+        );
+      } else {
+        dispatch(
+          authSlice.actions.updateUserProfile({
+            userId: null,
+            displayName: null,
+          })
+        );
+        dispatch(
+          authSlice.actions.authStateChange({
+            stateChange: false,
+          })
+        );
+      }
+    });
+  } catch (error) {
+    console.log("Ошибка в функции authStateChanged:", error);
+  }
+};
 
 export const authSignOutUser = () => async (dispatch) => {
   try {

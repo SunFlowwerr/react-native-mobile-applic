@@ -18,9 +18,9 @@ import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
 import { store, db } from "../../firebase/config";
-import { ref, uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSelector } from "react-redux";
-import { collection } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 export const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -50,11 +50,14 @@ export const CreatePostsScreen = ({ navigation }) => {
     try {
       const processedPhoto = await uploadPhotoToServer(photo);
 
-      await collection(db, "posts").add({
+      console.log(processedPhoto);
+
+      console.log(title, place, displayName, userId, processedPhoto);
+
+      await addDoc(collection(db, "posts"), {
         photo: processedPhoto,
         title,
         place,
-        displayName,
         userId,
       });
 
@@ -75,8 +78,12 @@ export const CreatePostsScreen = ({ navigation }) => {
       await uploadBytes(storageRef, file);
 
       console.log("Photo uploaded successfully!");
+
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
     } catch (error) {
       console.error("Error uploading photo:", error);
+      throw error;
     }
   };
 
@@ -164,7 +171,7 @@ export const CreatePostsScreen = ({ navigation }) => {
         params: { photo, title, place, location },
       });
       // uploadPhotoToServer(photo);
-      console.log(title, place);
+      console.log(title, place, displayName, userId, photo);
       uploadPostsToServer(title, place, displayName, userId, photo);
       reset();
       setIsButtonActive(false);
@@ -343,6 +350,8 @@ const styles = StyleSheet.create({
   addPhotoContainer: {
     display: "flex",
     alignItems: "center",
+    borderRadius: 8,
+    overflow: "hidden",
   },
   photoContainer: {
     display: "flex",
@@ -355,6 +364,7 @@ const styles = StyleSheet.create({
     borderColor: "#E8E8E8",
     backgroundColor: "#F6F6F6",
     borderRadius: 8,
+    overflow: "hidden",
   },
   backPhoto: {},
   photoIconContainer: {
