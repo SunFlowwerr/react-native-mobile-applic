@@ -70,7 +70,6 @@ export const CommentsScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getComments(postId);
-    console.log(uri);
   });
 
   return (
